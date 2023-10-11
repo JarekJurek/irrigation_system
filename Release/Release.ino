@@ -43,9 +43,10 @@ int offHours = 0;   // variable for the main turn-off switch
 bool runDisabled = false;   // the state of the turn-off switch
 int lastOffHour = 0;
 
+int runTime = 20;   // runTime initial value. Modifiable by slider.
+
 int startH1 = 0;    // start hour for vale 1
 int startM1 = 0;    // start minute
-int runTime1 = 20;  // run time in minutes
 int count1 = 0;     // couter for minutes with open valve
 int lastMin1 = 0;   // for catching that minute has changed
 bool valveOpen1 = 0;  // inital state of valve's button
@@ -53,7 +54,6 @@ int virtualPin1 = 1;
 
 int startH2 = 1;
 int startM2 = 0;
-int runTime2 = 20;
 int count2 = 0;
 int lastMin2 = 0;
 bool valveOpen2 = 0;
@@ -61,7 +61,6 @@ int virtualPin2 = 2;
 
 int startH3 = 2;
 int startM3 = 0;
-int runTime3 = 20;
 int count3 = 0;
 int lastMin3 = 0;
 bool valveOpen3 = 0;
@@ -69,7 +68,6 @@ int virtualPin3 = 3;
 
 int startH4 = 3;
 int startM4 = 0;
-int runTime4 = 20;
 int count4 = 0;
 int lastMin4 = 0;
 bool valveOpen4 = 0;
@@ -77,7 +75,6 @@ int virtualPin4 = 4;
 
 int startH5 = 4;
 int startM5 = 0;
-int runTime5 = 20;
 int count5 = 0;
 int lastMin5 = 0;
 bool valveOpen5 = 0;
@@ -85,7 +82,6 @@ int virtualPin5 = 5;
 
 int startH6 = 5;
 int startM6 = 0;
-int runTime6 = 20;
 int count6 = 0;
 int lastMin6 = 0;
 bool valveOpen6 = 0;
@@ -174,6 +170,13 @@ BLYNK_WRITE(V6) {
   }
 }
 
+BLYNK_WRITE(V7) {
+  runTime = param.asInt();
+  if (runTime > 59 || runTime < 1) {
+    runTime = 20;
+  }
+}
+
 void changeValveState(int valveNr, int virtualPin, bool &valveOpen, bool isOpen) {
     digitalWrite(valveNr, !isOpen);             // changing valve state, 0 is open
     Blynk.virtualWrite(virtualPin, isOpen);   // changing valve's button to ON (schedule run)
@@ -187,7 +190,7 @@ void startOnCondition(int valveNr, int &lastMin, int virtualPin, bool &valveOpen
   }
 }
 
-void stopOnCondition(int valveNr, int runTime, int &count, int &lastMin, int virtualPin, bool &valveOpen) {
+void stopOnCondition(int valveNr, int &count, int &lastMin, int virtualPin, bool &valveOpen) {
   if (!valveOpen) {  // is not running
     return;
   }
@@ -256,22 +259,22 @@ void loop() {
 
   // main functions
   startOnCondition(valve1, lastMin1, virtualPin1, valveOpen1, startH1, startM1);
-  stopOnCondition(valve1, runTime1, count1, lastMin1, virtualPin1, valveOpen1);
+  stopOnCondition(valve1, count1, lastMin1, virtualPin1, valveOpen1);
 
   startOnCondition(valve2, lastMin2, virtualPin2, valveOpen2, startH2, startM2);
-  stopOnCondition(valve2, runTime2, count2, lastMin2, virtualPin2, valveOpen2);
+  stopOnCondition(valve2, count2, lastMin2, virtualPin2, valveOpen2);
 
   startOnCondition(valve3, lastMin3, virtualPin3, valveOpen3, startH3, startM3);
-  stopOnCondition(valve3, runTime3, count3, lastMin3, virtualPin3, valveOpen3);
+  stopOnCondition(valve3, count3, lastMin3, virtualPin3, valveOpen3);
 
   startOnCondition(valve4, lastMin4, virtualPin4, valveOpen4, startH4, startM4);
-  stopOnCondition(valve4, runTime4, count4, lastMin4, virtualPin4, valveOpen4);
+  stopOnCondition(valve4, count4, lastMin4, virtualPin4, valveOpen4);
 
   startOnCondition(valve5, lastMin5, virtualPin5, valveOpen5, startH5, startM5);
-  stopOnCondition(valve5, runTime5, count5, lastMin5, virtualPin5, valveOpen5);
+  stopOnCondition(valve5, count5, lastMin5, virtualPin5, valveOpen5);
 
   startOnCondition(valve6, lastMin6, virtualPin6, valveOpen6, startH6, startM6);
-  stopOnCondition(valve6, runTime6, count6, lastMin6, virtualPin6, valveOpen6);
+  stopOnCondition(valve6, count6, lastMin6, virtualPin6, valveOpen6);
 
   delay(50);
 }
