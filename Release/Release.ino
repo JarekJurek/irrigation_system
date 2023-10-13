@@ -178,9 +178,9 @@ BLYNK_WRITE(V7) {
 }
 
 void changeValveState(int valveNr, int virtualPin, bool &valveOpen, bool isOpen) {
-    digitalWrite(valveNr, !isOpen);             // changing valve state, 0 is open
-    Blynk.virtualWrite(virtualPin, isOpen);   // changing valve's button to ON (schedule run)
-    valveOpen = isOpen;
+  digitalWrite(valveNr, !isOpen);             // changing valve state, 0 is open
+  Blynk.virtualWrite(virtualPin, isOpen);   // changing valve's button to ON (schedule run)
+  valveOpen = isOpen;
 }
 
 void startOnCondition(int valveNr, int &lastMin, int virtualPin, bool &valveOpen, int startH, int startM) {
