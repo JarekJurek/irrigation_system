@@ -2,8 +2,8 @@
 /*  Grzegorz Pawlak
     grzes.pawlak@gmail.com
     Irrigation System
-    based on ESP32 and Blynk 2.0 platform
-    Firmware werson 0.1.5
+    based on ESP32 and Blynk 2.0 (lib 1.2.0) platform
+    Firmware werson 1.0.0
 */
 
 // 0.1.1 - full WIFI functionality, with general OFF button
@@ -11,11 +11,12 @@
 // 0.1.3 - rebulding system  
 // 0.1.4 - updated time and run times
 // 0.1.5 - updated time and run times
+// 1.0.0 - runtime adjustable
 
 #define BLYNK_TEMPLATE_ID "TMPLcq7dN-Vf"
 #define BLYNK_DEVICE_NAME "Irrigation"
 
-#define BLYNK_FIRMWARE_VERSION        "0.1.5"
+#define BLYNK_FIRMWARE_VERSION        "1.0.0"
 
 #define BLYNK_PRINT Serial
 
@@ -31,6 +32,11 @@ struct ts t;  // for RTC
 
 const int rainSensorPin = 23;   // ESP32's pin number for rain sensor
 bool rainDetected = 0;
+
+int virtualPinHour = 8;
+int virtualPinMinute = 9;
+
+BlynkTimer timer;
 
 const int valve1 = 27;  // defining ESP32's valve port
 const int valve2 = 14;
@@ -177,6 +183,16 @@ BLYNK_WRITE(V7) {
   }
 }
 
+void publishTime(int hour, int minute) {
+  Blynk.virtualWrite(virtualPinHour, hour);
+  Blynk.virtualWrite(virtualPinMinute, minute);
+}
+
+void updateBlynkTime() {
+  DS3231_get(&t);
+  publishTime(t.hour, t.min);
+}
+
 void changeValveState(int valveNr, int virtualPin, bool &valveOpen, bool isOpen) {
   digitalWrite(valveNr, !isOpen);             // changing valve state, 0 is open
   Blynk.virtualWrite(virtualPin, isOpen);   // changing valve's button to ON (schedule run)
@@ -218,28 +234,29 @@ void setup() {
   digitalWrite(valve6, 1);
 
   pinMode(rainSensorPin, INPUT);
-  pinMode(2, OUTPUT);
 
   Serial.begin(9600);
   Wire.begin();
   DS3231_init(DS3231_CONTROL_INTCN);
   delay(200);
 
-//   t.hour = 15;  // initial clock setting
-//   t.min = 45;
-//   t.sec = 30;
-//   t.mday = 2;
-//   t.mon = 6;
-//   t.year = 2023;
+  // t.hour = 15;  // initial clock setting
+  // t.min = 45;
+  // t.sec = 30;
+  // t.mday = 2;
+  // t.mon = 6;
+  // t.year = 2023;
   
-  DS3231_set(t);
+  // DS3231_set(t);
 
+  timer.setInterval(59000L, updateBlynkTime);  // publsih time every 59 seconds
   BlynkEdgent.begin();
 }
 
 void loop() {
   DS3231_get(&t);
   BlynkEdgent.run();
+  timer.run();
 
   rainDetected = !digitalRead(rainSensorPin);  // sensor's 1 - no rain, 0 - rain
 
@@ -275,6 +292,4 @@ void loop() {
 
   startOnCondition(valve6, lastMin6, virtualPin6, valveOpen6, startH6, startM6);
   stopOnCondition(valve6, count6, lastMin6, virtualPin6, valveOpen6);
-
-  delay(50);
 }
