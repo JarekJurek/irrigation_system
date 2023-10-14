@@ -7,19 +7,17 @@ void setup() {
   Serial.begin(9600);
   Wire.begin();
 
-  // Uncomment the lines below to set the time initially
-  /*
-  t.hour = 12;  // Set the initial time here
-  t.min = 34;
-  t.sec = 0;
-  t.mday = 1;  // Day of the month
-  t.mon = 1;    // Month
-  t.year = 2023; // Year
-  t.wday = 2;   // Day of the week: 0 = Sunday, 1 = Monday, etc.
+  // // Uncomment the lines below to set the time initially
+  // t.hour = 14;  // Set the initial time here
+  // t.min = 15;
+  // t.sec = 0;
+  // t.mday = 14;  // Day of the month
+  // t.mon = 10;    // Month
+  // t.year = 2023; // Year
+  // t.wday = 6;   // Day of the week: 0 = Sunday, 1 = Monday, etc.
   
-  // Set the time
-  DS3231_set(t);
-  */
+  // // Set the time
+  // DS3231_set(t);
 
   // Initialize the RTC
   DS3231_init(DS3231_CONTROL_INTCN);
