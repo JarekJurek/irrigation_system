@@ -45,12 +45,12 @@ This system reduces water waste and simplifies irrigation management, making it 
 ### 1. **ESP32 Multi-Zone Irrigation Control**
 This schematic showcases the connections between the ESP32, relay module, and the rain sensor to control solenoid valves across multiple garden sections.
 
-![ESP32 Schematic](../doc/pcbPrototype.png)
+![ESP32 Schematic](doc/pcbPrototype.png)
 
 ### 2. **Arduino UNO RTC Integration**
 This schematic illustrates how the Arduino UNO interacts with the DS3231 RTC module to schedule watering tasks.
 
-![Arduino UNO RTC Schematic](../doc/UNO_RTC.png)
+![Arduino UNO RTC Schematic](doc/UNO_RTC.png)
 
 
 ## **Software Setup**
