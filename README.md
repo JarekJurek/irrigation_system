@@ -1,28 +1,28 @@
 # **Autonomous Garden Irrigation System**
 
-This project demonstrates a modular, automated system to manage multiple irrigation sections for a garden. Built using ESP32, Blynk, Arduino UNO, and an RTC module, the system ensures efficient and timely water distribution based on user schedules and environmental inputs such as rain detection.
+This project demonstrates a modular, automated system to manage multiple irrigation sections for a garden. Built using an ESP32 and Blynk, the system ensures efficient and timely water distribution based on user schedules and environmental inputs such as rain detection.
 
 
 ## **Overview**
 
 The **Smart Garden Irrigation System** is designed to automate watering across multiple zones of a garden. It uses:
 - **ESP32** for remote control and WiFi connectivity.
-- **Arduino UNO** paired with a **DS3231 RTC module** for precise scheduling.
 - Relays for controlling solenoid valves that regulate water flow to specific sections.
 - Environmental sensors (rain sensor) to optimize water usage.
 
 This system reduces water waste and simplifies irrigation management, making it ideal for smart gardening enthusiasts.
 
 ### System operation
-* If rain is detected the system changes into not-operational state for 24h. After that time the system is again operational unless there is still water in rain senor.
-* Every valve opens at specified hour and closes after time set by the slider.
-* The system time from RTC is displayed in the app. If time differs significantly from the actual time, it is recommended to use the script utils/rtc_time/rtc_time.ino and other board to set it.
+* If rain is detected the system changes into not-operational state for 24h. After that time the system is again operational unless there is still water in rain sensor.
+* Every valve opens at specified hour (local time) and closes after time set by the slider.
+* Device time is synchronized from the network using NTP (WiFi/internet required). Firmware is configured for Warsaw timezone (CET/CEST).
+* If time is not yet synchronized (e.g., no internet), automatic schedule starts are skipped (manual control still works).
 
 
 ## **Features**
 
 - **Multi-Zone Irrigation:** Control multiple garden sections independently.
-- **Scheduled Watering:** Use RTC to ensure accurate irrigation timing.
+- **Scheduled Watering:** Uses NTP-synchronized local time for accurate irrigation timing.
 - **Rain Detection:** Automatically suspend irrigation during rain.
 - **WiFi Connectivity:** Remote monitoring and control via platforms like Blynk.
 - **Scalability:** Add more zones or sensors as needed.
@@ -31,8 +31,6 @@ This system reduces water waste and simplifies irrigation management, making it 
 ## **Hardware Requirements**
 
 - **ESP32 Development Board**  
-- **Arduino UNO**  
-- **DS3231 RTC Module**  
 - **X-Channel Relay Module** (for controlling solenoid valves)  
 - **Rain Sensor**  
 - **Solenoid Valves** (one per irrigation zone)  
@@ -47,18 +45,15 @@ This schematic showcases the connections between the ESP32, relay module, and th
 
 ![ESP32 Schematic](doc/pcbPrototype.png)
 
-### 2. **Arduino UNO RTC Integration**
-This schematic illustrates how the Arduino UNO interacts with the DS3231 RTC module to schedule watering tasks.
-
-![Arduino UNO RTC Schematic](doc/UNO_RTC.png)
-
 
 ## **Software Setup**
 
 ### **Prerequisites**
 Before starting, ensure you have the following libraries installed in your Arduino IDE:
 - [Blynk Library](https://github.com/blynkkk/blynk-library) (for IoT connectivity)
-- [RTClib](https://github.com/adafruit/RTClib) (for RTC module functionality; find in `lib/`)
+
+Optional network check (from a computer on the same WiFi):
+- `python3 utils/check_ntp_udp123.py` to verify outbound UDP/123 (NTP) is reachable.
 
 ### **Setting Up ESP32 in Arduino IDE**
 To program the ESP32, you need to add the ESP32 board support to the Arduino IDE:
@@ -70,7 +65,7 @@ To program the ESP32, you need to add the ESP32 board support to the Arduino IDE
 
 ### **Steps to Upload Code**
 1. Open the provided `.ino` files in the Arduino IDE.  
-2. Select the appropriate board (**Arduino UNO** for RTC-related functions or **ESP32** for relay control).  
+2. Select the appropriate board (**ESP32**).  
 3. Connect the board to your computer via USB.  
 4. Upload the code to the respective devices.
 
@@ -83,7 +78,7 @@ To program the ESP32, you need to add the ESP32 board support to the Arduino IDE
 
 2. **Power On the System:**
 - Supply 12V power to the relays and valves.
-- Ensure both the ESP32 and Arduino UNO are powered and operational.
+- Ensure the ESP32 is powered and connected to WiFi.
 
 3. **Schedule Irrigation:**
 - Use the Blynk app or pre-configure the Arduino code to set watering schedules.
