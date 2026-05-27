@@ -104,16 +104,21 @@ void EnsureNtpConfigured() {
   g_ntp_configured = true;
 }
 
-void PublishTime(int hour, int minute) {
-  Blynk.virtualWrite(kVirtualPinHour, hour);
-  Blynk.virtualWrite(kVirtualPinMinute, minute);
-}
-
 void UpdateBlynkTime() {
   EnsureNtpConfigured();
   struct tm ti;
-  if (GetLocalTimeNonBlocking(&ti)) {
-    PublishTime(ti.tm_hour, ti.tm_min);
+  if (GetLocalTimeNonBlocking(&ti) && IsTimeValid(time(nullptr))) {
+    Blynk.virtualWrite(kVirtualPinHour, ti.tm_hour);
+    Blynk.virtualWrite(kVirtualPinMinute, ti.tm_min);
+  }
+}
+
+void DisableRuns(time_t now) {
+  g_run_disabled = true;
+  if (IsTimeValid(now)) {
+    g_run_disabled_until = now + kDisableSeconds;
+  } else {
+    g_run_disabled_until = 0;
   }
 }
 
@@ -189,13 +194,7 @@ void CheckStopRun(size_t index) {
 BLYNK_WRITE(V0) {                 // Main turn-off button (24h disable)
   const bool is_on = (param.asInt() != 0);
   if (is_on) {                    // If the button is ON, disable scheduling for 24h.
-    g_run_disabled = true;
-    time_t now = time(nullptr);
-    if (IsTimeValid(now)) {
-      g_run_disabled_until = now + kDisableSeconds;
-    } else {
-      g_run_disabled_until = 0;
-    }
+    DisableRuns(time(nullptr));
   } else {
     g_run_disabled = false;
     g_run_disabled_until = 0;
@@ -264,12 +263,7 @@ void loop() {
 
   if (rain_detected && !g_run_disabled) {
     Blynk.virtualWrite(kVirtualPinOff, 1);
-    g_run_disabled = true;
-    if (time_ok) {
-      g_run_disabled_until = now + kDisableSeconds;
-    } else {
-      g_run_disabled_until = 0;
-    }
+    DisableRuns(time_ok ? now : 0);
   }
 
   // If disable was triggered before time was valid, start the 24h timer once we have a real clock.
@@ -277,7 +271,7 @@ void loop() {
     g_run_disabled_until = now + kDisableSeconds;
   }
 
-  if (g_run_disabled && time_ok && g_run_disabled_until != 0 && now >= g_run_disabled_until) {
+  if (g_run_disabled && time_ok && g_run_disabled_until != 0 && now >= g_run_disabled_until && !rain_detected) {
     Blynk.virtualWrite(kVirtualPinOff, 0);
     g_run_disabled = false;
     g_run_disabled_until = 0;
